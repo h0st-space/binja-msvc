@@ -9,7 +9,7 @@ on:
 
 env:
   CONFIGURE_PRESET: ci-release
-
+ 
 jobs:
   build:
     strategy:
