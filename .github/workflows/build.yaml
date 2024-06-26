@@ -32,11 +32,6 @@ jobs:
     - uses: actions/checkout@v4
       with:
         submodules: recursive
-
-    # Make sure Ninja is installed & we can create the stubs for Windows.
-    - uses: seanmiddleditch/gha-setup-ninja@master
-    - uses: ilammy/msvc-dev-cmd@v1
-
     - name: Fetch binaryninja-api
       uses: actions/checkout@v4
       with:
@@ -54,16 +49,18 @@ jobs:
           vendor
           examples
 
-    - name: Apply binaryninja-api patch
-      working-directory: binaryninja-api
-      run: git apply --verbose ../.github/${{matrix.api-version.patch-file}}
+    - uses: workflow/nix-shell-action@v3
+      with:
+          flakes: nixpkgs#ninja,nixpkgs#cmake,nixpkgs#git
+          script: |
+            cd binaryninja-api
+            git apply --verbose ../.github/${{matrix.api-version.patch-file}}
+            cd ..
+            cmake --preset ${{env.CONFIGURE_PRESET}}
+            cmake --build build
+            mv build/${{matrix.platform.binary}} build/${{matrix.api-version.abi}}-${{matrix.platform.binary}}
 
-    - name: Build
-      run: |
-        cmake --preset ${{env.CONFIGURE_PRESET}}
-        cmake --build build
-        mv build/${{matrix.platform.binary}} build/${{matrix.api-version.abi}}-${{matrix.platform.binary}}
-
+            
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
