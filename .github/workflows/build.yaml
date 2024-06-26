@@ -27,7 +27,7 @@ jobs:
         platform:
           - name: ubuntu
             binary: libbinja-msvc.so
-    runs-on: ${{matrix.platform.name}}-latest
+    runs-on: [self-hosted, x86_64-linux ]
     steps:
     - uses: actions/checkout@v4
       with:
